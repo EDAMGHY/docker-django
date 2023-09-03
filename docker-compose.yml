@@ -1,0 +1,38 @@
+version: '3.2'
+services:
+  web:
+    container_name: "${PROJECT_NAME}_php"
+    build:
+      context: ./
+      dockerfile: .docker/python/Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  db:
+    build:
+      context: ./
+      dockerfile: .docker/mysql/Dockerfile
+    container_name: "${PROJECT_NAME}_db"
+    environment:
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "user"
+      MYSQL_PASSWORD: "123456"
+    volumes:
+      - dbdata:/var/lib/mysql
+  pma:
+    image: phpmyadmin/phpmyadmin
+    container_name: "${PROJECT_NAME}_pma"
+    ports:
+       - "8001:80"
+    environment:
+      PMA_HOSTS: "${PROJECT_NAME}_db"
+      PMA_USER: "user"
+      PMA_PASSWORD: "123456"
+      UPLOAD_LIMIT: 2G
+      MAX_EXECUTION_TIME: 0
+    depends_on:
+      - db
+volumes:
+  dbdata:
